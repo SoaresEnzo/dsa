@@ -38,6 +38,15 @@ func NewLinkedList(list []any) *LinkedList[any] {
 	return linkedList
 }
 
+func (l *LinkedList[T]) Print() {
+	fmt.Print(
+		"Data: ", l.ToSlice(),
+		" - Size: ", l.length,
+		" - Head: ", l.head.value,
+		" - Tail: ", l.tail.value,
+		"\n")
+}
+
 func (l *LinkedList[T]) Append(item T) {
 	node := &Node[T]{
 		value: item,
@@ -59,21 +68,25 @@ func (l *LinkedList[T]) Prepend(item T) {
 	l.length++
 }
 
-func (l *LinkedList[T]) Insert(index int, item T) {
-	var previousNode *Node[T]
+func (l *LinkedList[T]) getNode(index int) *Node[T] {
+	var node *Node[T]
+	for i := 0; i <= l.length-1 && i <= index; i++ {
+		if i == 0 {
+			node = l.head
+		} else {
+			node = node.next
+		}
+	}
+	return node
+}
 
+func (l *LinkedList[T]) Insert(index int, item T) {
 	newNode := &Node[T]{
 		value: item,
 		next:  nil,
 	}
 
-	for i := 0; i <= l.length-1 && i <= index-1; i++ {
-		if i == 0 {
-			previousNode = l.head
-		} else {
-			previousNode = previousNode.next
-		}
-	}
+	previousNode := l.getNode(index - 1)
 
 	l.length++
 
@@ -94,6 +107,33 @@ func (l *LinkedList[T]) Insert(index int, item T) {
 	previousNode.next = newNode
 }
 
+func (l *LinkedList[T]) Remove(index int) {
+	previousNode := l.getNode(index - 1)
+
+	if previousNode == nil {
+		l.head = l.head.next
+		l.length--
+		return
+	}
+
+	nodeToBeRemoved := previousNode.next
+
+	if previousNode.next == nil {
+		return
+	}
+
+	if nodeToBeRemoved == nil || nodeToBeRemoved.next == nil {
+		l.tail = previousNode
+		previousNode.next = nil
+		l.length--
+		return
+	}
+
+	previousNode.next = previousNode.next.next
+	l.length--
+	return
+}
+
 func (l *LinkedList[T]) ToSlice() []T {
 	currentNode := l.head
 	slice := []T{}
@@ -112,5 +152,10 @@ func main() {
 	linkedList.Append("F")
 	linkedList.Insert(7, "E")
 	// fmt.Print(linkedList.head.next.next.value)
-	fmt.Print(linkedList.ToSlice(), " ", linkedList.length, "\n")
+	linkedList.Print()
+	linkedList.Remove(0)
+	linkedList.Print()
+	linkedList.Remove(4)
+	linkedList.Print()
+
 }
